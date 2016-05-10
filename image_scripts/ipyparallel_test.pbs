@@ -1,0 +1,28 @@
+#PBS -lselect=3:ncpus=24:mpiprocs=24:model=has
+###PBS -l walltime=4:00:00
+#PBS -j oe
+#PBS -W group_list=s1568
+#PBS -m e
+#PBS -q devel
+# only submit one job, jobs will que faster but limited to 2 hours
+#cd $PBS_O_WORKDIR
+#submit job to the above dir, which is the current dir
+# comment to run on front-end, uncomment to submit job on back-end
+ 
+module load python/2.7.11
+ 
+## go to the directory the user typed 'qsub' in
+cd $PBS_O_WORKDIR
+ 
+## start IPython cluster with eight engines using the mpi profile
+## remember 8 (engines) = 2 (nodes) x 4 (processors)
+ipcluster start -n=72 --profile=mpi &
+## the engines are ready after 30s, we will give them an
+## extra 10s as grace period
+sleep 60
+## run the script you want to run
+## python can be used instead of ipython, but in case of errors
+## ipython offers more valuable tracebacks
+ipython parallel_pipeline_pleiades.py
+## stop the IPython cluster again
+ipcluster stop --profile=mpi
